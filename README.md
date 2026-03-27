@@ -1,6 +1,5 @@
 # 🌊 Advanced Oil Spill Detection using Transfer Learning & Approximate Learning
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://tensorflow.org)
 
@@ -120,10 +119,11 @@ Uncertainty:    0.015 (Low)
 * **Matplotlib & Seaborn:** Performance visualization and confusion matrices.
 
 ---
-
+## 🌐 Deployement
+  **Streamlit Web App Deployment:** Created an interactive dashboard for image uploads which shows Confidence level and matrix
+---
 ## 🚀 Future Work
 
-* 🌐 **Streamlit Web App Deployment:** Creating an interactive dashboard for image uploads.
 * 🛰️ **Real-time Satellite Integration:** Fetching live data via the **Copernicus API**.
 * 🧠 **Advanced Architectures:** Comparative testing with **ResNet-50** and **EfficientNet-B0**.
 * 🧩 **Image Segmentation:** Implementing **U-Net** for precise, pixel-level spill mapping.
