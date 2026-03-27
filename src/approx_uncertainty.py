@@ -4,29 +4,21 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 
 
-# -----------------------------
 # PREPROCESS (FROM PATH)
-# -----------------------------
 def preprocess_image(img_path):
     img = image.load_img(img_path, target_size=(224, 224))
     img_array = image.img_to_array(img) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
     return img_array
 
-
-# -----------------------------
 # PREPROCESS (FROM PIL IMAGE - STREAMLIT)
-# -----------------------------
 def preprocess_pil_image(pil_img):
     img = pil_img.resize((224, 224))
     img_array = image.img_to_array(img) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
     return img_array
 
-
-# -----------------------------
 # ✅ UPDATED MC DROPOUT FUNCTION
-# -----------------------------
 def predict_with_uncertainty(model, input_data, mc_runs=30, is_path=False):
     """
     Works for BOTH:
@@ -62,10 +54,7 @@ def predict_with_uncertainty(model, input_data, mc_runs=30, is_path=False):
 
     return label, float(mean_pred), float(std_pred)
 
-
-# -----------------------------
 # SCRIPT MODE FUNCTION
-# -----------------------------
 def run_uncertainty(model, img_path):
 
     label, mean, std = predict_with_uncertainty(

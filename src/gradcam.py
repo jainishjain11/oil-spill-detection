@@ -5,9 +5,7 @@ import matplotlib.pyplot as plt
 import os
 
 
-# -----------------------------
 # COMMON: Load image (for CLI)
-# -----------------------------
 def get_img_array(img_path, size=(224, 224)):
     img = tf.keras.preprocessing.image.load_img(img_path, target_size=size)
     array = tf.keras.preprocessing.image.img_to_array(img)
@@ -15,9 +13,7 @@ def get_img_array(img_path, size=(224, 224)):
     return array / 255.0
 
 
-# -----------------------------
 # CORE GRAD-CAM LOGIC
-# -----------------------------
 def make_gradcam_heatmap(img_array, model, last_conv_layer_name):
     grad_model = tf.keras.models.Model(
         [model.inputs],
@@ -42,9 +38,7 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name):
     return heatmap
 
 
-# -----------------------------
 # CLI VERSION (main.py)
-# -----------------------------
 def save_and_display_gradcam(img_path, heatmap, output_path="outputs/gradcam.jpg", alpha=0.4):
     img = cv2.imread(img_path)
     img = cv2.resize(img, (224, 224))
@@ -80,9 +74,7 @@ def run_gradcam(model, img_path):
     save_and_display_gradcam(img_path, heatmap)
 
 
-# -----------------------------
 # STREAMLIT VERSION (app.py)
-# -----------------------------
 def generate_gradcam(model, image, alpha=0.4):
     """
     Streamlit-compatible Grad-CAM

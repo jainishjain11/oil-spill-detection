@@ -69,9 +69,7 @@ st.markdown("""
 st.title("🛰️ Advanced Oil Spill Detection using Satellite Images")
 st.caption("Transfer Learning + Approximate Learning (MC Dropout) + Explainability")
 
-# -------------------------
 # SIDEBAR
-# -------------------------
 st.sidebar.header("⚙️ Controls")
 
 mc_runs = st.sidebar.slider("MC Dropout Runs", 5, 100, 30)
@@ -83,15 +81,11 @@ uploaded_files = st.sidebar.file_uploader(
     accept_multiple_files=True
 )
 
-# -------------------------
 # HISTORY STORAGE
-# -------------------------
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# -------------------------
 # MAIN UI
-# -------------------------
 if uploaded_files:
 
     st.subheader("📊 Analysis Results")
@@ -138,9 +132,7 @@ if uploaded_files:
 else:
     st.info("👈 Upload images from sidebar to start analysis")
 
-# -------------------------
 # HISTORY TABLE
-# -------------------------
 if st.session_state.history:
 
     st.subheader("📜 Prediction History")
@@ -158,8 +150,6 @@ if st.session_state.history:
         mime="text/csv"
     )
 
-# -------------------------
 # FOOTER
-# -------------------------
 st.markdown("---")
 st.caption("Built by Jainish Jain and Yashodhan Singh Rathore")
