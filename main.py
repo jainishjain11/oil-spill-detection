@@ -1,78 +1,50 @@
-import streamlit as st
-import numpy as np
-import cv2
-import os
 import sys
-from tensorflow.keras.models import load_model
-from PIL import Image
+import os
 
 # Fix import path
 sys.path.append(os.path.abspath("src"))
 
-from approx_uncertainty import predict_with_uncertainty
-from gradcam import make_gradcam_heatmap
+from data_loader import get_data_generators
+from model import build_model
+from transfer_train import train_model
+from transfer_evaluate import evaluate_model
+from visualization import plot_metrics, plot_confusion_matrix
+from approx_uncertainty import run_uncertainty
+from tensorflow.keras.models import load_model
+from gradcam import run_gradcam
 
-# Load model
+# Paths
+DATA_PATH = "data/raw/"
 MODEL_PATH = "models/oil_spill_mobilenetv2.h5"
+TEST_IMAGE = "test.jpg"
 
-@st.cache_resource
-def load_my_model():
-    return load_model(MODEL_PATH)
+print("🚀 Starting Pipeline...")
 
-model = load_my_model()
+# Step 1: Load data
+train_gen, val_gen = get_data_generators(DATA_PATH)
 
-# UI
-st.set_page_config(page_title="Oil Spill Detection", layout="centered")
+# Step 2: Load or Train model
+if os.path.exists(MODEL_PATH):
+    print("📦 Loading existing model...")
+    model = load_model(MODEL_PATH)
+else:
+    print("⚡ Training new model...")
+    model = build_model()
+    train_model(model, train_gen, val_gen)
 
-st.title("Oil Spill Detection using AI")
-st.markdown("Upload a SAR image to detect oil spills with confidence & uncertainty")
+# Step 3: Transfer Learning Evaluation (IMPORTANT FIX)
+report, accuracy, y_true, y_pred = evaluate_model(model, val_gen)
 
-# Upload image
-uploaded_file = st.file_uploader("Upload Image", type=["jpg", "png", "jpeg"])
+# Step 4: Visualization (Graphs)
+plot_metrics(report, accuracy, y_true, y_pred)
 
-if uploaded_file is not None:
+# Step 5: Confusion Matrix
+plot_confusion_matrix(y_true, y_pred)
 
-    # Display image
-    image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+# Step 6: Approximate Learning (MC Dropout)
+run_uncertainty(model, TEST_IMAGE)
 
-    # Preprocess
-    img = np.array(image)
-    img_resized = cv2.resize(img, (224, 224))
-    img_resized = img_resized / 255.0
-    img_input = np.expand_dims(img_resized, axis=0)
+# Step 7: Grad-CAM Visualization
+run_gradcam(model, TEST_IMAGE)
 
-    # 🔥 Prediction + Uncertainty
-    mean_pred, uncertainty = predict_with_uncertainty(model, img_input)
-
-    label = "Oil Spill Detected" if mean_pred > 0.5 else "No Oil Spill"
-    confidence = float(mean_pred)
-
-    st.subheader("Prediction Result")
-    st.write(label)
-    st.write(f"Confidence: {confidence:.4f}")
-    st.write(f"Uncertainty: {uncertainty:.4f}")
-
-    # Interpretation
-    if uncertainty < 0.02:
-        st.success("Low Uncertainty (High Confidence)")
-    elif uncertainty < 0.05:
-        st.warning("Moderate Uncertainty")
-    else:
-        st.error("High Uncertainty")
-
-    # 🔥 Grad-CAM
-    st.subheader("Model Attention (Grad-CAM)")
-
-    # ⚠️ CHANGE THIS LAYER NAME IF ERROR
-    LAST_CONV_LAYER = "Conv_1"
-
-    heatmap = make_gradcam_heatmap(img_input, model, LAST_CONV_LAYER)
-
-    heatmap = cv2.resize(heatmap, (image.size[0], image.size[1]))
-    heatmap = np.uint8(255 * heatmap)
-
-    superimposed_img = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-    superimposed_img = cv2.addWeighted(np.array(image), 0.6, superimposed_img, 0.4, 0)
-
-    st.image(superimposed_img, caption="Grad-CAM Heatmap", use_column_width=True)
+print("✅ Pipeline Completed!")
