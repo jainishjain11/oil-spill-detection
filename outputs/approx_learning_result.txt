@@ -1,0 +1,5 @@
+Approximate Learning Output
+Prediction: Oil Spill Detected!!
+Confidence: 0.9814
+Uncertainty: 0.0327
+Interpretation: Low Uncertainty (High Confidence Prediction)

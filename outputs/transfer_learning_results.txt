@@ -1,0 +1,15 @@
+Transfer Learning Output
+
+Predicted classes: [0 1]
+True classes: [0 1]
+
+              precision    recall  f1-score   support
+
+           0       0.97      0.92      0.94       745
+           1       0.85      0.95      0.90       381
+
+    accuracy                           0.93      1126
+   macro avg       0.91      0.93      0.92      1126
+weighted avg       0.93      0.93      0.93      1126
+
+Accuracy: 0.9290
