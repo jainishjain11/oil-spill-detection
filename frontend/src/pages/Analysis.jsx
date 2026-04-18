@@ -20,7 +20,7 @@ export default function Analysis() {
       <div className="card">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <UploadCloud size={20} color="var(--primary)" />
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>
+          <h2 className="font-outfit" style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>
             Upload SAR Images
           </h2>
         </div>
@@ -36,11 +36,11 @@ export default function Analysis() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>
+              <h2 className="font-outfit" style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>
                 Analysis Results
               </h2>
               <span style={{
-                fontSize: 12, fontWeight: 600, color: 'var(--primary)',
+                fontSize: 12, fontWeight: 700, color: 'var(--primary)',
                 background: 'var(--primary-bg)', padding: '2px 8px', borderRadius: 999
               }}>
                 {results.length}

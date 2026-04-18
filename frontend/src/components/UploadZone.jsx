@@ -77,35 +77,63 @@ export default function UploadZone({ mcRuns, gradcamEnabled, onResults }) {
       <div
         {...getRootProps()}
         className={`dropzone ${isDragActive ? 'dropzone-active' : ''} ${processing ? 'dropzone-disabled' : ''}`}
+        style={{ position: 'relative', overflow: 'hidden' }}
       >
+        {/* Radar Background Element */}
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%',
+          width: 300, height: 300,
+          background: 'radial-gradient(circle, var(--mesh-1) 0%, transparent 60%)',
+          borderRadius: '50%',
+          transform: 'translate(-50%, -50%)',
+          pointerEvents: 'none',
+          animation: 'pulse-dot 4s infinite'
+        }} />
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%',
+          width: 300, height: 300,
+          border: '1px solid var(--border)',
+          borderRadius: '50%',
+          transform: 'translate(-50%, -50%)',
+          pointerEvents: 'none',
+          opacity: 0.5
+        }} />
+
         <input {...getInputProps()} id="image-upload-input" />
         
         <div style={{
-          width: 64, height: 64, borderRadius: '50%',
-          background: isDragActive ? 'var(--primary-bg)' : 'var(--surface)',
-          border: `1px solid ${isDragActive ? 'var(--primary-bdr)' : 'var(--border)'}`,
+          position: 'relative',
+          width: 72, height: 72, borderRadius: '50%',
+          background: isDragActive ? 'var(--primary-bg)' : 'var(--glass-bg)',
+          backdropFilter: 'blur(8px)',
+          border: `1px solid ${isDragActive ? 'var(--primary-bdr)' : 'var(--glass-border)'}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 16px',
+          margin: '0 auto 20px',
           color: isDragActive ? 'var(--primary)' : 'var(--text-muted)',
-          transition: 'all 0.2s'
+          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          boxShadow: isDragActive ? 'var(--shadow-glow)' : 'var(--shadow-md)',
+          transform: isDragActive ? 'scale(1.1)' : 'scale(1)',
+          zIndex: 2
         }}>
           <UploadCloud size={32} />
         </div>
 
-        {isDragActive ? (
-          <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--primary)' }}>
-            Drop files to process immediately...
-          </p>
-        ) : (
-          <>
-            <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
-              Click to upload or drag and drop
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          {isDragActive ? (
+            <p className="font-outfit" style={{ fontSize: 18, fontWeight: 700, color: 'var(--primary)' }}>
+              Drop files to begin scan...
             </p>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-              SAR Imagery (JPG, PNG) up to 10MB
-            </p>
-          </>
-        )}
+          ) : (
+            <>
+              <p className="font-outfit" style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+                Initialize SAR Analysis
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                Drag and drop Sentinel-1 imagery or click to browse
+              </p>
+            </>
+          )}
+        </div>
       </div>
 
       {/* File Previews */}

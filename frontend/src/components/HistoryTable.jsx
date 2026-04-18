@@ -4,6 +4,7 @@ import useSessionStore from "../store/sessionStore";
 
 const COLUMNS = [
   { key: "index",           label: "#",               sortable: false },
+  { key: "preview",         label: "Preview",         sortable: false },
   { key: "filename",        label: "Filename",         sortable: true },
   { key: "time",            label: "Time",             sortable: false },
   { key: "prediction",      label: "Prediction",       sortable: true },
@@ -137,6 +138,17 @@ export default function HistoryTable() {
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--surface)'}
               >
                 <td style={{ padding: '12px 20px', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                <td style={{ padding: '12px 20px' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 6, overflow: 'hidden', background: 'var(--surface-alt)', border: '1px solid var(--border)' }}>
+                     {row.previewUrl || row._preview ? (
+                        <img src={row.previewUrl || row._preview} alt="thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                     ) : (
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ fontSize: 9, color: 'var(--text-faint)' }}>—</span>
+                        </div>
+                     )}
+                  </div>
+                </td>
                 <td style={{
                   padding: '12px 20px', color: 'var(--text-primary)', fontWeight: 500,
                   maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
