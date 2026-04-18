@@ -2,13 +2,8 @@ import { lazy, Suspense } from "react";
 import StatusBadge from "./StatusBadge";
 import MetricCard from "./MetricCard";
 
-// Lazy-load heatmap viewer for performance
 const HeatmapViewer = lazy(() => import("./HeatmapViewer"));
 
-/**
- * ResultPanel — Full card for a single image prediction result.
- * Ocean-themed with color-coded top accent stripe.
- */
 export default function ResultPanel({ result, gradcamEnabled, animationDelay = 0 }) {
   const {
     filename,
@@ -19,36 +14,21 @@ export default function ResultPanel({ result, gradcamEnabled, animationDelay = 0
     processing_time_ms,
     timestamp,
     _preview,
-    previewUrl,   // ← may come from store
+    previewUrl,
   } = result;
 
   const imgSrc = _preview || previewUrl || null;
-
   const isSpill = prediction === "Oil Spill";
   const isUncertain = (uncertainty ?? 0) > 0.3;
 
-  // Top accent color
-  const accentColor = isSpill
-    ? "var(--spill-red)"
-    : isUncertain
-    ? "var(--warn-amber)"
-    : "var(--clean-green)";
-
-  // Card glow
-  const glowColor = isSpill
-    ? "rgba(255, 69, 96, 0.08)"
-    : isUncertain
-    ? "rgba(255, 167, 38, 0.08)"
-    : "rgba(0, 230, 118, 0.08)";
+  const accentColor = isSpill ? "var(--spill)" : isUncertain ? "var(--warn)" : "var(--clean)";
 
   return (
     <div
+      className="card"
       style={{
-        background: 'var(--ocean-deep)',
-        border: '1px solid var(--ocean-border)',
-        borderRadius: 12,
+        padding: 0,
         overflow: 'hidden',
-        boxShadow: `0 4px 24px ${glowColor}, 0 0 0 0 transparent`,
         animation: 'fadeUp 0.4s ease-out both',
         animationDelay: `${animationDelay}ms`,
         display: 'flex',
@@ -56,21 +36,21 @@ export default function ResultPanel({ result, gradcamEnabled, animationDelay = 0
       }}
     >
       {/* Top accent stripe */}
-      <div style={{ height: 2, background: accentColor, flexShrink: 0 }} />
+      <div style={{ height: 3, background: accentColor, flexShrink: 0 }} />
 
       {/* Card header */}
       <div style={{
-        padding: '10px 12px',
-        borderBottom: '1px solid var(--ocean-border-sub)',
+        padding: '12px 16px',
+        borderBottom: '1px solid var(--border-sub)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 4,
+        gap: 6,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <p style={{
-            fontSize: 10,
-            color: 'var(--cyan-ghost)',
-            fontFamily: 'Inter, sans-serif',
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--text-primary)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -84,11 +64,11 @@ export default function ResultPanel({ result, gradcamEnabled, animationDelay = 0
           <StatusBadge prediction={prediction} uncertainty={uncertainty} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 9, color: 'var(--cyan-trace)', fontFamily: 'Inter, sans-serif' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif' }}>
             {timestamp ? new Date(timestamp).toLocaleTimeString() : "—"}
           </span>
           {processing_time_ms != null && (
-            <span style={{ fontSize: 9, color: 'var(--cyan-trace)', fontFamily: 'Inter, sans-serif' }}>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
               · {processing_time_ms >= 1000
                 ? `${(processing_time_ms / 1000).toFixed(1)}s`
                 : `${Math.round(processing_time_ms)}ms`}
@@ -97,40 +77,27 @@ export default function ResultPanel({ result, gradcamEnabled, animationDelay = 0
         </div>
       </div>
 
-      {/* SAR image preview */}
-      <div style={{ height: 90, background: 'var(--ocean-surface)', position: 'relative', overflow: 'hidden' }}>
-        {/* SVG grid overlay */}
-        <svg
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.1, pointerEvents: 'none' }}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <pattern id={`grid-${filename?.replace(/\W/g,'')}`} width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--cyan-bright)" strokeWidth="0.5"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill={`url(#grid-${filename?.replace(/\W/g,'')})`} />
-        </svg>
-
+      {/* Image Preview */}
+      <div style={{ height: 120, background: 'var(--surface-alt)', position: 'relative', overflow: 'hidden' }}>
         {imgSrc ? (
           <img
             src={imgSrc}
-            alt="SAR"
-            style={{ width: '100%', height: '90px', objectFit: 'cover', display: 'block' }}
+            alt="SAR Image"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         ) : (
           <div style={{
             width: '100%', height: '100%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <span style={{ fontSize: 10, color: 'var(--cyan-trace)', fontFamily: 'Inter, sans-serif' }}>
-              No preview available
+            <span style={{ fontSize: 12, color: 'var(--text-faint)' }}>
+              No image preview available
             </span>
           </div>
         )}
       </div>
 
-      {/* Metrics row */}
+      {/* Metrics */}
       <MetricCard
         confidence={confidence}
         uncertainty={uncertainty}
@@ -138,13 +105,20 @@ export default function ResultPanel({ result, gradcamEnabled, animationDelay = 0
         prediction={prediction}
       />
 
-      {/* Grad-CAM panels */}
-      <HeatmapViewer
-        originalSrc={imgSrc}
-        gradcamBase64={gradcam_image}
-        filename={filename}
-        gradcamEnabled={gradcamEnabled}
-      />
+      {/* Grad-CAM Heatmap Viewer */}
+      <div style={{ padding: '12px 16px' }}>
+        <Suspense fallback={
+          <div className="skeleton" style={{ height: 64, borderRadius: 8 }} />
+        }>
+          <HeatmapViewer
+            originalSrc={imgSrc}
+            gradcamBase64={gradcam_image}
+            filename={filename}
+            gradcamEnabled={gradcamEnabled}
+          />
+        </Suspense>
+      </div>
+
     </div>
   );
 }

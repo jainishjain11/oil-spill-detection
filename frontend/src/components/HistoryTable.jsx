@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Download, SearchX, ArrowUpDown } from "lucide-react";
 import useSessionStore from "../store/sessionStore";
 
 const COLUMNS = [
@@ -11,9 +12,6 @@ const COLUMNS = [
   { key: "processing_time_ms", label: "Processing (ms)", sortable: true },
 ];
 
-/**
- * HistoryTable — Ocean-themed session prediction log with sortable columns and CSV export.
- */
 export default function HistoryTable() {
   const { history, clearHistory, exportCSV } = useSessionStore();
   const [sortKey, setSortKey] = useState("index");
@@ -22,15 +20,15 @@ export default function HistoryTable() {
   if (history.length === 0) {
     return (
       <div style={{
-        background: 'var(--ocean-deep)',
-        border: '1px solid var(--ocean-border)',
-        borderRadius: 12,
-        padding: '14px',
-        textAlign: 'center',
-        paddingTop: 28, paddingBottom: 28,
+        background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 12,
+        padding: '32px 16px', textAlign: 'center',
       }}>
-        <p style={{ fontSize: 11, color: 'var(--cyan-ghost)', fontFamily: 'Inter, sans-serif' }}>
-          No predictions yet. Upload SAR images above to begin analysis.
+        <SearchX size={32} color="var(--border-focus)" style={{ margin: '0 auto 12px' }} />
+        <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>
+          No predictions available
+        </p>
+        <p style={{ fontSize: 13, color: 'var(--text-faint)' }}>
+          Session history will populate as you process images.
         </p>
       </div>
     );
@@ -56,99 +54,72 @@ export default function HistoryTable() {
   });
 
   const predictionColor = (pred, unc) => {
-    if (pred === "Oil Spill") return "var(--spill-red)";
-    if ((unc ?? 0) > 0.3)    return "var(--warn-amber)";
-    return "var(--clean-green)";
+    if (pred === "Oil Spill") return "var(--spill)";
+    if ((unc ?? 0) > 0.3)    return "var(--warn)";
+    return "var(--clean)";
   };
 
   const uncertaintyColor = (unc) => {
-    if (unc >= 0.3) return "var(--spill-red)";
-    if (unc >= 0.1) return "var(--warn-amber)";
-    return "var(--clean-green)";
+    if (unc >= 0.3) return "var(--spill)";
+    if (unc >= 0.1) return "var(--warn)";
+    return "var(--clean)";
   };
 
   return (
-    <div style={{
-      background: 'var(--ocean-deep)',
-      border: '1px solid var(--ocean-border)',
-      borderRadius: 12,
-      padding: 14,
-    }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Table icon */}
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="12" height="12" rx="2" stroke="var(--cyan-dim)" strokeWidth="1"/>
-            <path d="M1 5h12M5 1v12" stroke="var(--cyan-dim)" strokeWidth="1"/>
-          </svg>
+    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      {/* Header Toolbar */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '16px 20px', borderBottom: '1px solid var(--border)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>Log Entries</span>
           <span style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: 12, fontWeight: 600,
-            color: 'var(--text-primary)',
-          }}>
-            Session log
-          </span>
-          <span style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: 9, fontWeight: 600,
-            color: 'var(--cyan-mid)',
-            background: 'rgba(0, 168, 200, 0.12)',
-            border: '1px solid rgba(0, 168, 200, 0.2)',
-            borderRadius: 999,
-            padding: '1px 7px',
+            fontSize: 12, fontWeight: 600, color: 'var(--primary)',
+            background: 'var(--primary-bg)', border: '1px solid var(--primary-bdr)',
+            padding: '2px 8px', borderRadius: 999
           }}>
             {history.length}
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: 6 }}>
-          <button
-            id="export-csv-btn"
-            onClick={exportCSV}
-            className="btn-export"
-          >
-            ↓ Export CSV
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button onClick={exportCSV} className="btn-ghost" style={{ padding: '6px 12px' }}>
+            <Download size={14} /> Export CSV
           </button>
-          <button
-            id="clear-history-btn"
-            onClick={clearHistory}
-            className="btn-clear"
-          >
-            Clear
+          <button onClick={clearHistory} className="btn-ghost" style={{ color: 'var(--spill)', padding: '6px 12px' }}>
+            Clear Log
           </button>
         </div>
       </div>
 
       {/* Table */}
-      <div style={{ overflowX: 'auto', borderRadius: 8, border: '1px solid var(--ocean-border)' }}>
-        <table style={{ width: '100%', fontSize: 10, borderCollapse: 'collapse', fontFamily: 'Inter, sans-serif' }}>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse', fontFamily: 'Inter, sans-serif' }}>
           <thead>
-            <tr style={{ background: 'var(--ocean-mid)', borderBottom: '1px solid var(--ocean-border)' }}>
+            <tr style={{ background: 'var(--surface-alt)', borderBottom: '1px solid var(--border)' }}>
               {COLUMNS.map((col) => (
                 <th
                   key={col.key}
                   onClick={() => handleSort(col.key)}
                   style={{
-                    padding: '8px 10px',
-                    textAlign: 'left',
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    fontSize: 9,
-                    fontWeight: 600,
-                    color: 'var(--cyan-faint)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    whiteSpace: 'nowrap',
-                    cursor: col.sortable ? 'pointer' : 'default',
-                    userSelect: 'none',
+                    padding: '12px 20px', textAlign: 'left',
+                    fontSize: 12, fontWeight: 600, color: 'var(--text-muted)',
+                    whiteSpace: 'nowrap', cursor: col.sortable ? 'pointer' : 'default', userSelect: 'none',
+                    transition: 'background-color 0.2s',
                   }}
+                  onMouseEnter={(e) => col.sortable && (e.currentTarget.style.backgroundColor = 'var(--surface-hover)')}
+                  onMouseLeave={(e) => col.sortable && (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
-                  {col.label}
-                  {col.sortable && sortKey === col.key && (
-                    <span style={{ marginLeft: 4, color: 'var(--cyan-bright)' }}>
-                      {sortDir === "asc" ? "↑" : "↓"}
-                    </span>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {col.label}
+                    {col.sortable && sortKey === col.key && (
+                       <ArrowUpDown size={12} color="var(--primary)" style={{ 
+                         transform: sortDir === "asc" ? 'rotate(180deg)' : 'none',
+                         transition: 'transform 0.2s'
+                       }} />
+                    )}
+                  </div>
                 </th>
               ))}
             </tr>
@@ -157,44 +128,47 @@ export default function HistoryTable() {
             {sorted.map((row, idx) => (
               <tr
                 key={row.id}
-                style={{ borderBottom: '1px solid var(--ocean-border-dim)' }}
-              >
-                <td style={{ padding: '7px 10px', color: 'var(--cyan-ghost)' }}>{idx + 1}</td>
-                <td style={{
-                  padding: '7px 10px',
-                  color: 'var(--cyan-ghost)',
-                  maxWidth: 140,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
+                style={{
+                  borderBottom: '1px solid var(--border)',
+                  background: 'var(--surface)',
+                  transition: 'background-color 0.2s'
                 }}
-                  title={row.filename}
-                >
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--surface-alt)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--surface)'}
+              >
+                <td style={{ padding: '12px 20px', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                <td style={{
+                  padding: '12px 20px', color: 'var(--text-primary)', fontWeight: 500,
+                  maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }} title={row.filename}>
                   {row.filename}
                 </td>
-                <td style={{ padding: '7px 10px', color: 'var(--cyan-ghost)', whiteSpace: 'nowrap' }}>
+                <td style={{ padding: '12px 20px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                   {new Date(row.timestamp).toLocaleTimeString()}
                 </td>
-                <td style={{ padding: '7px 10px' }}>
+                <td style={{ padding: '12px 20px' }}>
                   <span style={{
                     color: predictionColor(row.prediction, row.uncertainty),
                     fontWeight: 600,
+                    background: row.prediction === "Oil Spill" ? "var(--spill-bg)" : "var(--clean-bg)",
+                    border: `1px solid ${row.prediction === "Oil Spill" ? "var(--spill-bdr)" : "var(--clean-bdr)"}`,
+                    padding: '4px 8px', borderRadius: 6, fontSize: 12
                   }}>
                     {row.prediction}
                   </span>
                 </td>
-                <td style={{ padding: '7px 10px', color: 'var(--cyan-ghost)', fontVariantNumeric: 'tabular-nums' }}>
+                <td style={{ padding: '12px 20px', color: 'var(--text-body)', fontVariantNumeric: 'tabular-nums' }}>
                   {row.confidence.toFixed(2)}%
                 </td>
                 <td style={{
-                  padding: '7px 10px',
+                  padding: '12px 20px',
                   color: uncertaintyColor(row.uncertainty),
                   fontVariantNumeric: 'tabular-nums',
-                  fontWeight: 500,
+                  fontWeight: 600,
                 }}>
                   {row.uncertainty.toFixed(4)}
                 </td>
-                <td style={{ padding: '7px 10px', color: 'var(--cyan-ghost)', fontVariantNumeric: 'tabular-nums' }}>
+                <td style={{ padding: '12px 20px', color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
                   {row.processing_time_ms.toFixed(0)}
                 </td>
               </tr>

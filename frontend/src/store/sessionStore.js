@@ -6,6 +6,10 @@ import { create } from "zustand";
  */
 const useSessionStore = create((set, get) => ({
   history: [],
+  mcRuns: 30,
+  gradcamEnabled: true,
+  setMcRuns: (val) => set({ mcRuns: val }),
+  setGradcamEnabled: (val) => set({ gradcamEnabled: val }),
 
   /** Append a new prediction result to history */
   addResult: (result) =>

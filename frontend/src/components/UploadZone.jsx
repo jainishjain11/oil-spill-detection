@@ -1,22 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { UploadCloud, X, Loader2 } from "lucide-react";
 import { predictImage } from "../services/api";
 import useSessionStore from "../store/sessionStore";
 import toast from "react-hot-toast";
 
-/**
- * UploadZone — Ocean-themed drag & drop multi-image uploader.
- * Shows SVG ocean scene with animated waves and file previews.
- */
 export default function UploadZone({ mcRuns, gradcamEnabled, onResults }) {
   const [pendingFiles, setPendingFiles] = useState([]);
   const [processing, setProcessing] = useState(false);
   const [processingIndex, setProcessingIndex] = useState(-1);
   const addResult = useSessionStore((s) => s.addResult);
 
-  // Revoke object URLs on unmount
   const pendingRef = useRef(pendingFiles);
   pendingRef.current = pendingFiles;
+
   useEffect(() => {
     return () => {
       pendingRef.current.forEach((f) => {
@@ -27,7 +24,7 @@ export default function UploadZone({ mcRuns, gradcamEnabled, onResults }) {
 
   const onDrop = useCallback((acceptedFiles, rejectedFiles) => {
     if (rejectedFiles.length > 0) {
-      toast.error("Only JPG and PNG images are accepted.", { id: "bad-type" });
+      toast.error("Only JPG and PNG images are accepted.");
     }
     const previews = acceptedFiles.map((file) =>
       Object.assign(file, { preview: URL.createObjectURL(file) })
@@ -57,18 +54,13 @@ export default function UploadZone({ mcRuns, gradcamEnabled, onResults }) {
         newResults.push(result);
         addResult(result);
       } catch (err) {
-        const msg = err?.response?.data?.detail ||
-          `Failed to process "${file.name}". Check backend connection.`;
-        toast.error(msg, { duration: 6000 });
+        toast.error(`Failed to process "${file.name}".`);
       }
     }
 
     setProcessing(false);
     setProcessingIndex(-1);
     onResults(newResults);
-
-    // Revoke only after results are delivered (ResultPanel needs preview URLs)
-    // Don't revoke here — let ResultPanel/HeatmapViewer use them.
     setPendingFiles([]);
   };
 
@@ -80,179 +72,121 @@ export default function UploadZone({ mcRuns, gradcamEnabled, onResults }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Drop zone */}
       <div
         {...getRootProps()}
-        className={[
-          'dropzone',
-          isDragActive ? 'dropzone-active' : '',
-          processing ? 'dropzone-disabled' : '',
-        ].join(' ')}
+        className={`dropzone ${isDragActive ? 'dropzone-active' : ''} ${processing ? 'dropzone-disabled' : ''}`}
       >
         <input {...getInputProps()} id="image-upload-input" />
-
-        {/* Ocean SVG scene */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
-          <svg width="220" height="52" viewBox="0 0 220 52" xmlns="http://www.w3.org/2000/svg"
-            style={{ borderRadius: 8, overflow: 'hidden' }}>
-            {/* Ocean background */}
-            <rect width="220" height="52" fill="var(--ocean-surface)" rx="8" />
-
-            {/* Wave layer 1 (deepest) */}
-            <path
-              d="M-20 38 Q15 28 50 36 Q85 44 120 34 Q155 24 190 32 Q210 36 240 30 L240 52 L-20 52 Z"
-              fill="#00304a"
-              opacity="0.7"
-              style={{ animation: 'waveShift 4s linear infinite' }}
-            />
-            {/* Wave layer 2 */}
-            <path
-              d="M-20 40 Q20 32 55 40 Q90 48 125 38 Q160 28 195 36 Q210 40 240 34 L240 52 L-20 52 Z"
-              fill="#005578"
-              opacity="0.6"
-              style={{ animation: 'waveShift 4s linear infinite 0.8s' }}
-            />
-            {/* Wave layer 3 (surface) */}
-            <path
-              d="M-20 44 Q25 37 60 44 Q95 51 130 42 Q165 33 200 41 L240 38 L240 52 L-20 52 Z"
-              fill="#0088aa"
-              opacity="0.5"
-              style={{ animation: 'waveShift 4s linear infinite 1.6s' }}
-            />
-
-            {/* Upload icon centered above waves */}
-            <g transform="translate(95, 8)">
-              <circle cx="15" cy="15" r="13" fill="rgba(0, 212, 255, 0.12)" stroke="var(--cyan-bright)" strokeWidth="1"/>
-              <path d="M15 20 L15 10 M11 14 L15 10 L19 14" stroke="var(--cyan-bright)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <path d="M10 22 L20 22" stroke="var(--cyan-bright)" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
-            </g>
-          </svg>
+        
+        <div style={{
+          width: 64, height: 64, borderRadius: '50%',
+          background: isDragActive ? 'var(--primary-bg)' : 'var(--surface)',
+          border: `1px solid ${isDragActive ? 'var(--primary-bdr)' : 'var(--border)'}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 16px',
+          color: isDragActive ? 'var(--primary)' : 'var(--text-muted)',
+          transition: 'all 0.2s'
+        }}>
+          <UploadCloud size={32} />
         </div>
 
         {isDragActive ? (
-          <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--cyan-bright)', fontFamily: 'Inter, sans-serif' }}>
-            Release to analyse these images…
+          <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--primary)' }}>
+            Drop files to process immediately...
           </p>
         ) : (
           <>
-            <p style={{ fontSize: 14, fontWeight: 600, color: '#a0d4e8', fontFamily: 'Inter, sans-serif', marginBottom: 6 }}>
-              Drop SAR images to analyse
+            <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+              Click to upload or drag and drop
             </p>
-            <p style={{ fontSize: 11, color: 'var(--cyan-ghost)', fontFamily: 'Inter, sans-serif' }}>
-              Drag & drop or click to browse — JPG, PNG · Sentinel-1 SAR imagery
+            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+              SAR Imagery (JPG, PNG) up to 10MB
             </p>
           </>
         )}
       </div>
 
-      {/* File preview strip */}
+      {/* File Previews */}
       {pendingFiles.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--cyan-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'Inter, sans-serif' }}>
-            {pendingFiles.length} file{pendingFiles.length > 1 ? "s" : ""} queued
+        <div style={{
+          background: 'var(--surface-alt)',
+          border: '1px solid var(--border)',
+          borderRadius: 12,
+          padding: 16,
+        }}>
+          <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 12 }}>
+            {pendingFiles.length} file{pendingFiles.length > 1 ? "s" : ""} selected for analysis
           </p>
 
-          {/* File thumbnails strip */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
             {pendingFiles.map((file, idx) => (
-              <div key={file.name + idx} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <div style={{ position: 'relative' }}>
+              <div key={file.name + idx} style={{ position: 'relative', width: 64 }}>
+                <div style={{ position: 'relative', width: 64, height: 64, borderRadius: 8, overflow: 'hidden' }}>
                   <img
                     src={file.preview}
                     alt={file.name}
                     style={{
-                      width: 40, height: 40,
-                      objectFit: 'cover',
-                      borderRadius: 6,
+                      width: '100%', height: '100%', objectFit: 'cover',
+                      opacity: processing && processingIndex !== idx ? 0.5 : 1,
                       border: processingIndex === idx
-                        ? '2px solid var(--cyan-bright)'
-                        : '1px solid var(--ocean-border)',
-                      display: 'block',
-                      boxShadow: processingIndex === idx ? '0 0 8px rgba(0,212,255,0.4)' : 'none',
+                        ? '2px solid var(--primary)'
+                        : '1px solid var(--border)'
                     }}
                   />
-                  {/* Spinner overlay */}
+                  
                   {processingIndex === idx && (
                     <div style={{
                       position: 'absolute', inset: 0,
+                      background: 'rgba(0,0,0,0.5)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: 'rgba(2, 13, 24, 0.7)',
-                      borderRadius: 6,
+                      color: 'white'
                     }}>
-                      <div style={{
-                        width: 14, height: 14,
-                        border: '2px solid var(--cyan-bright)',
-                        borderTopColor: 'transparent',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                      }} />
+                      <Loader2 size={24} className="animate-spin" />
                     </div>
                   )}
-                  {/* Remove button */}
-                  {!processing && (
-                    <button
-                      onClick={() => removePending(idx)}
-                      style={{
-                        position: 'absolute', top: -6, right: -6,
-                        width: 16, height: 16,
-                        borderRadius: '50%',
-                        background: 'var(--spill-red)',
-                        border: 'none',
-                        color: '#fff',
-                        fontSize: 9,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 700,
-                      }}
-                      aria-label={`Remove ${file.name}`}
-                    >
-                      ×
-                    </button>
-                  )}
                 </div>
-                <span style={{
-                  fontSize: 8, color: 'var(--cyan-trace)', fontFamily: 'Inter, sans-serif',
-                  maxWidth: 50, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+
+                {!processing && (
+                  <button
+                    onClick={() => removePending(idx)}
+                    style={{
+                      position: 'absolute', top: -6, right: -6,
+                      width: 20, height: 20, borderRadius: '50%',
+                      background: 'var(--surface)', border: '1px solid var(--border)',
+                      color: 'var(--text-muted)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer', boxShadow: 'var(--shadow-sm)'
+                    }}
+                  >
+                    <X size={12} strokeWidth={3} />
+                  </button>
+                )}
+                
+                <p style={{
+                  fontSize: 10, color: 'var(--text-muted)', marginTop: 6,
+                  textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
                 }}>
                   {file.name}
-                </span>
+                </p>
               </div>
             ))}
           </div>
 
-          {/* Analyze button */}
           <button
-            id="analyze-btn"
             onClick={handleAnalyze}
             disabled={processing}
             className="btn-primary"
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              width: '100%', marginTop: 4,
-            }}
+            style={{ width: '100%' }}
           >
             {processing ? (
-              <>
-                <div style={{
-                  width: 14, height: 14,
-                  border: '2px solid rgba(2,13,24,0.4)',
-                  borderTopColor: 'var(--ocean-void)',
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite',
-                }} />
-                Analysing {processingIndex + 1} / {pendingFiles.length}…
-              </>
+               <>
+                 <Loader2 size={16} className="animate-spin" />
+                 Processing {processingIndex + 1} of {pendingFiles.length}...
+               </>
             ) : (
-              <>
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M7 4.5v5M4.5 7h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                Analyse {pendingFiles.length} Image{pendingFiles.length > 1 ? "s" : ""}
-              </>
+               <>Perform Analysis on {pendingFiles.length} file{pendingFiles.length > 1 ? "s" : ""}</>
             )}
           </button>
         </div>

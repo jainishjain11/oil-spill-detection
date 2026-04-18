@@ -1,6 +1,14 @@
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
-import Dashboard from "./pages/Dashboard";
+
+import useThemeStore from "./store/themeStore";
+import Layout from "./components/Layout";
+import Overview from "./pages/Overview";
+import Analysis from "./pages/Analysis";
+import HistoryPage from "./pages/History";
+import SettingsPage from "./pages/Settings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -9,24 +17,36 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
+  const initTheme = useThemeStore((s) => s.initTheme);
+
+  useEffect(() => {
+    initTheme();
+  }, [initTheme]);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <Dashboard />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Overview />} />
+            <Route path="analysis" element={<Analysis />} />
+            <Route path="history" element={<HistoryPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+      
       <Toaster
         position="bottom-right"
         toastOptions={{
           style: {
-            background: "#1a1f2e",
-            color: "#e2e8f0",
-            border: "1px solid #2d3548",
+            background: "var(--surface)",
+            color: "var(--text-primary)",
+            border: "1px solid var(--border)",
             fontSize: "13px",
             fontFamily: "Inter, sans-serif",
-          },
-          error: {
-            iconTheme: { primary: "#ef4444", secondary: "#1a1f2e" },
-          },
-          success: {
-            iconTheme: { primary: "#10b981", secondary: "#1a1f2e" },
+            boxShadow: "var(--shadow-lg)",
           },
         }}
       />

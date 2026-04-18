@@ -1,5 +1,5 @@
 /**
- * StatusBadge — Pill badge for prediction status with ocean-themed colors.
+ * StatusBadge — Pill badge for prediction status.
  */
 export default function StatusBadge({ prediction, uncertainty }) {
   const isSpill = prediction === "Oil Spill";
@@ -10,7 +10,7 @@ export default function StatusBadge({ prediction, uncertainty }) {
       <span className="badge-spill">
         <span style={{
           width: 6, height: 6, borderRadius: '50%',
-          background: 'var(--spill-red)',
+          background: 'var(--spill)',
           display: 'inline-block',
           animation: 'pulse-dot 2s infinite'
         }} />
@@ -24,7 +24,7 @@ export default function StatusBadge({ prediction, uncertainty }) {
       <span className="badge-uncertain">
         <span style={{
           width: 6, height: 6, borderRadius: '50%',
-          background: 'var(--warn-amber)',
+          background: 'var(--warn)',
           display: 'inline-block',
         }} />
         Uncertain
@@ -36,7 +36,7 @@ export default function StatusBadge({ prediction, uncertainty }) {
     <span className="badge-clean">
       <span style={{
         width: 6, height: 6, borderRadius: '50%',
-        background: 'var(--clean-green)',
+        background: 'var(--clean)',
         display: 'inline-block',
       }} />
       No Oil Spill

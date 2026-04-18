@@ -1,24 +1,17 @@
 import { useEffect, useRef } from "react";
 
-/**
- * MetricCard — Three-column metrics: confidence ring, uncertainty badge, processing time.
- * Uses Space Grotesk for numbers, animated SVG confidence ring.
- */
-
 // ── Animated confidence ring ──────────────────────────────────────────────────
 function ConfidenceRing({ value, prediction }) {
   const radius = 34;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (value / 100) * circumference;
   const isSpill = prediction === "Oil Spill";
-  const color = isSpill ? "var(--spill-red)" : "var(--clean-green)";
-  const glowColor = isSpill ? "rgba(255,69,96,0.4)" : "rgba(0,230,118,0.4)";
+  const color = isSpill ? "var(--spill)" : "var(--clean)";
 
   const circleRef = useRef(null);
 
   useEffect(() => {
     if (!circleRef.current) return;
-    // Start from full offset (invisible), animate to actual value
     circleRef.current.style.transition = 'none';
     circleRef.current.style.strokeDashoffset = circumference;
     // Force reflow
@@ -28,25 +21,19 @@ function ConfidenceRing({ value, prediction }) {
   }, [value, circumference, offset]);
 
   const confColor = value >= 70
-    ? "var(--cyan-bright)"
+    ? "var(--primary)"
     : value >= 50
-    ? "var(--warn-amber)"
-    : "var(--spill-red)";
+    ? "var(--warn)"
+    : "var(--spill)";
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
       <svg width="84" height="84" viewBox="0 0 84 84">
-        {/* Outer glow ring */}
-        <circle cx="42" cy="42" r={radius + 4}
-          fill="none"
-          stroke={isSpill ? "rgba(255,69,96,0.06)" : "rgba(0,230,118,0.06)"}
-          strokeWidth="8"
-        />
         {/* Track */}
         <circle cx="42" cy="42" r={radius}
           fill="none"
-          stroke="#0a2a3a"
-          strokeWidth="7"
+          stroke="var(--border)"
+          strokeWidth="6"
         />
         {/* Progress */}
         <circle
@@ -54,12 +41,11 @@ function ConfidenceRing({ value, prediction }) {
           cx="42" cy="42" r={radius}
           fill="none"
           stroke={confColor}
-          strokeWidth="7"
+          strokeWidth="6"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={circumference}
           style={{
-            filter: `drop-shadow(0 0 6px ${glowColor})`,
             transform: 'rotate(-90deg)',
             transformOrigin: '50% 50%',
           }}
@@ -69,10 +55,10 @@ function ConfidenceRing({ value, prediction }) {
           x="42" y="38"
           textAnchor="middle"
           dominantBaseline="central"
-          fill={confColor}
-          fontSize="13"
+          fill="var(--text-primary)"
+          fontSize="14"
           fontWeight="700"
-          fontFamily="'Space Grotesk', sans-serif"
+          fontFamily="'Inter', sans-serif"
         >
           {value.toFixed(1)}%
         </text>
@@ -80,37 +66,34 @@ function ConfidenceRing({ value, prediction }) {
           x="42" y="52"
           textAnchor="middle"
           dominantBaseline="central"
-          fill="var(--cyan-trace)"
-          fontSize="8"
+          fill="var(--text-faint)"
+          fontSize="9"
           fontFamily="'Inter', sans-serif"
         >
-          conf.
+          Conf.
         </text>
       </svg>
-      <p style={{ fontSize: 10, color: 'var(--cyan-dim)', fontFamily: 'Inter, sans-serif' }}>
-        Confidence
-      </p>
     </div>
   );
 }
 
 // ── Uncertainty badge ─────────────────────────────────────────────────────────
 function UncertaintyBadge({ value }) {
-  let color = "var(--clean-green)";
+  let color = "var(--clean)";
   let label = "Low";
-  let bg = "var(--clean-green-bg)";
-  let border = "var(--clean-green-bdr)";
+  let bg = "var(--clean-bg)";
+  let border = "var(--clean-bdr)";
 
   if (value >= 0.3) {
-    color = "var(--spill-red)";
+    color = "var(--spill)";
     label = "High";
-    bg = "var(--spill-red-bg)";
-    border = "var(--spill-red-bdr)";
+    bg = "var(--spill-bg)";
+    border = "var(--spill-bdr)";
   } else if (value >= 0.1) {
-    color = "var(--warn-amber)";
+    color = "var(--warn)";
     label = "Medium";
-    bg = "var(--warn-amber-bg)";
-    border = "var(--warn-amber-bdr)";
+    bg = "var(--warn-bg)";
+    border = "var(--warn-bdr)";
   }
 
   return (
@@ -124,8 +107,8 @@ function UncertaintyBadge({ value }) {
         minWidth: 80,
       }}>
         <p style={{
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: 14,
+          fontFamily: "'Inter', sans-serif",
+          fontSize: 16,
           fontWeight: 700,
           color,
         }}>
@@ -133,17 +116,14 @@ function UncertaintyBadge({ value }) {
         </p>
         <p style={{
           fontFamily: 'Inter, sans-serif',
-          fontSize: 9,
+          fontSize: 10,
           fontWeight: 600,
           color,
           marginTop: 2,
         }}>
-          {label}
+          {label} Uncertainty
         </p>
       </div>
-      <p style={{ fontSize: 10, color: 'var(--cyan-dim)', fontFamily: 'Inter, sans-serif' }}>
-        Uncertainty σ
-      </p>
     </div>
   );
 }
@@ -155,34 +135,31 @@ function ProcessingTime({ ms }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
       <div style={{
-        background: 'var(--ocean-mid)',
-        border: '1px solid var(--ocean-border)',
+        background: 'var(--surface-alt)',
+        border: '1px solid var(--border)',
         borderRadius: 10,
         padding: '10px 12px',
         textAlign: 'center',
         minWidth: 80,
       }}>
         <p style={{
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: 14,
+          fontFamily: "'Inter', sans-serif",
+          fontSize: 16,
           fontWeight: 700,
-          color: 'var(--cyan-dim)',
+          color: 'var(--text-primary)',
         }}>
           {display}
         </p>
         <p style={{
           fontFamily: 'Inter, sans-serif',
-          fontSize: 9,
-          fontWeight: 600,
-          color: 'var(--cyan-trace)',
+          fontSize: 10,
+          fontWeight: 500,
+          color: 'var(--text-faint)',
           marginTop: 2,
         }}>
-          elapsed
+          Processing Time
         </p>
       </div>
-      <p style={{ fontSize: 10, color: 'var(--cyan-dim)', fontFamily: 'Inter, sans-serif' }}>
-        Processing
-      </p>
     </div>
   );
 }
@@ -193,9 +170,10 @@ export default function MetricCard({ confidence, uncertainty, processingTimeMs, 
     <div style={{
       display: 'grid',
       gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: 8,
-      padding: '8px 10px',
-      borderBottom: '1px solid var(--ocean-border-sub)',
+      gap: 12,
+      padding: '12px 16px',
+      borderBottom: '1px solid var(--border-sub)',
+      alignItems: 'center',
     }}>
       <ConfidenceRing value={confidence} prediction={prediction} />
       <UncertaintyBadge value={uncertainty} />

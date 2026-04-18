@@ -1,76 +1,89 @@
-import { Suspense } from "react";
+import { useState } from "react";
 
-/**
- * HeatmapViewer — Side-by-side Grad-CAM panels with ocean styling.
- */
-function HeatmapViewerInner({ originalSrc, gradcamBase64, filename, gradcamEnabled }) {
+export default function HeatmapViewer({ originalSrc, gradcamBase64, filename, gradcamEnabled }) {
+  const [showHeatMapMobile, setShowHeatMapMobile] = useState(false);
+
   const gradcamSrc = gradcamBase64
     ? `data:image/png;base64,${gradcamBase64}`
     : null;
 
   if (!gradcamEnabled || !gradcamSrc) {
     return (
-      <div style={{ padding: '8px 10px' }}>
-        <p style={{ fontSize: 8, color: 'var(--cyan-trace)', fontFamily: 'Inter', textAlign: 'center' }}>
-          {gradcamEnabled ? "Generating heatmap…" : "Grad-CAM disabled"}
+      <div style={{
+        background: 'var(--surface-alt)',
+        border: '1px dashed var(--border-focus)',
+        borderRadius: 8,
+        padding: 16,
+        textAlign: 'center'
+      }}>
+        <p style={{ fontSize: 12, color: 'var(--text-faint)', fontWeight: 500 }}>
+          {gradcamEnabled ? "Generating explanation heatmap..." : "Explainability (Grad-CAM) Disabled"}
         </p>
       </div>
     );
   }
 
   const panelStyle = {
-    borderRadius: 6,
+    borderRadius: 8,
     overflow: 'hidden',
-    border: '1px solid var(--ocean-border-sub)',
+    border: '1px solid var(--border)',
+    background: 'var(--surface-alt)',
+    display: 'flex',
+    flexDirection: 'column'
   };
 
   const labelStyle = {
-    fontSize: 8,
-    color: 'var(--cyan-trace)',
-    fontFamily: 'Inter, sans-serif',
+    fontSize: 11,
+    fontWeight: 600,
+    color: 'var(--text-muted)',
     textAlign: 'center',
-    background: 'var(--ocean-deep)',
-    padding: '3px 4px',
+    padding: '6px 0',
+    borderTop: '1px solid var(--border)',
+    background: 'var(--surface)'
   };
 
   return (
-    <div style={{ padding: '8px 10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-      {/* Original SAR */}
-      <div style={panelStyle}>
-        {originalSrc ? (
-          <img
-            src={originalSrc}
-            alt={`Original: ${filename}`}
-            style={{ width: '100%', height: 50, objectFit: 'cover', display: 'block' }}
-          />
-        ) : (
-          <div style={{ height: 50, background: 'var(--ocean-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: 10, color: 'var(--cyan-trace)' }}>No preview</span>
-          </div>
-        )}
-        <p style={labelStyle}>SAR Original</p>
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>Visual Explanation</p>
+        
+        {/* Mobile toggle button */}
+        <button
+          className="btn-ghost"
+          style={{ display: 'none' }} // can conditionally show this
+          onClick={() => setShowHeatMapMobile(!showHeatMapMobile)}
+        >
+          {showHeatMapMobile ? "View Original" : "View Map"}
+        </button>
       </div>
 
-      {/* Grad-CAM */}
-      <div style={panelStyle}>
-        <img
-          src={gradcamSrc}
-          alt={`Grad-CAM: ${filename}`}
-          style={{ width: '100%', height: 50, objectFit: 'cover', display: 'block' }}
-        />
-        <p style={labelStyle}>Grad-CAM XAI</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        
+        <div style={panelStyle}>
+          {originalSrc ? (
+            <img
+              src={originalSrc}
+              alt="Original"
+              style={{ width: '100%', height: 64, objectFit: 'cover' }}
+            />
+          ) : (
+             <div style={{ height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+               <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>Not available</span>
+             </div>
+          )}
+          <div style={labelStyle}>Original SAR</div>
+        </div>
+
+        <div style={panelStyle}>
+          <img
+            src={gradcamSrc}
+            alt="Grad-CAM"
+            style={{ width: '100%', height: 64, objectFit: 'cover' }}
+          />
+          <div style={labelStyle}>Grad-CAM Overlay</div>
+        </div>
+
       </div>
     </div>
-  );
-}
-
-export default function HeatmapViewer(props) {
-  return (
-    <Suspense fallback={
-      <div style={{ height: 70, margin: '0 10px', borderRadius: 6, background: 'var(--ocean-surface)' }}
-        className="skeleton" />
-    }>
-      <HeatmapViewerInner {...props} />
-    </Suspense>
   );
 }
