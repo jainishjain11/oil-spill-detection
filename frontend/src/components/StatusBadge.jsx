@@ -1,29 +1,45 @@
 /**
- * StatusBadge — Pill badge for Oil Spill / No Oil Spill predictions.
+ * StatusBadge — Pill badge for prediction status with ocean-themed colors.
  */
-export default function StatusBadge({ prediction, size = "md" }) {
+export default function StatusBadge({ prediction, uncertainty }) {
   const isSpill = prediction === "Oil Spill";
+  const isUncertain = (uncertainty ?? 0) > 0.3;
 
-  const sizeClasses = {
-    sm: "px-2 py-0.5 text-xs",
-    md: "px-3 py-1 text-sm",
-    lg: "px-4 py-1.5 text-base",
-  };
+  if (isSpill) {
+    return (
+      <span className="badge-spill">
+        <span style={{
+          width: 6, height: 6, borderRadius: '50%',
+          background: 'var(--spill-red)',
+          display: 'inline-block',
+          animation: 'pulse-dot 2s infinite'
+        }} />
+        Oil Spill
+      </span>
+    );
+  }
+
+  if (isUncertain) {
+    return (
+      <span className="badge-uncertain">
+        <span style={{
+          width: 6, height: 6, borderRadius: '50%',
+          background: 'var(--warn-amber)',
+          display: 'inline-block',
+        }} />
+        Uncertain
+      </span>
+    );
+  }
 
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full font-semibold border
-        ${sizeClasses[size]}
-        ${isSpill
-          ? "bg-red-500/20 text-red-400 border-red-500/30"
-          : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-        }`}
-    >
-      <span
-        className={`w-2 h-2 rounded-full animate-pulse-ring
-          ${isSpill ? "bg-red-400" : "bg-emerald-400"}`}
-      />
-      {prediction}
+    <span className="badge-clean">
+      <span style={{
+        width: 6, height: 6, borderRadius: '50%',
+        background: 'var(--clean-green)',
+        display: 'inline-block',
+      }} />
+      No Oil Spill
     </span>
   );
 }

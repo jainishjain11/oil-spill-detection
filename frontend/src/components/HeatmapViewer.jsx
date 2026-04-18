@@ -1,84 +1,75 @@
-import { lazy, Suspense, useState } from "react";
+import { Suspense } from "react";
 
 /**
- * HeatmapViewer — Shows original image alongside Grad-CAM overlay.
- * Side-by-side layout with a toggle to switch between both views on mobile.
- * Lazy-loaded for performance.
+ * HeatmapViewer — Side-by-side Grad-CAM panels with ocean styling.
  */
 function HeatmapViewerInner({ originalSrc, gradcamBase64, filename, gradcamEnabled }) {
-  const [showHeatmap, setShowHeatmap] = useState(false);
-
   const gradcamSrc = gradcamBase64
     ? `data:image/png;base64,${gradcamBase64}`
     : null;
 
   if (!gradcamEnabled || !gradcamSrc) {
     return (
-      <div className="mt-3">
-        <p className="text-xs text-slate-500 font-medium mb-2">Grad-CAM Heatmap</p>
-        <div className="flex items-center justify-center h-28 rounded-lg border border-dashed border-border bg-surface-2 text-slate-500 text-sm">
-          {gradcamEnabled ? "⏳ Generating…" : "Grad-CAM disabled"}
-        </div>
+      <div style={{ padding: '8px 10px' }}>
+        <p style={{ fontSize: 8, color: 'var(--cyan-trace)', fontFamily: 'Inter', textAlign: 'center' }}>
+          {gradcamEnabled ? "Generating heatmap…" : "Grad-CAM disabled"}
+        </p>
       </div>
     );
   }
 
-  return (
-    <div className="mt-3">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-xs text-slate-500 font-medium">Grad-CAM Heatmap</p>
-        {/* Mobile toggle */}
-        <button
-          onClick={() => setShowHeatmap((p) => !p)}
-          className="text-xs text-accent hover:text-accent-hover font-medium transition-colors lg:hidden"
-        >
-          {showHeatmap ? "Show Original" : "Show Heatmap"}
-        </button>
-      </div>
+  const panelStyle = {
+    borderRadius: 6,
+    overflow: 'hidden',
+    border: '1px solid var(--ocean-border-sub)',
+  };
 
-      {/* Desktop: side by side */}
-      <div className="hidden lg:grid grid-cols-2 gap-2">
-        <div>
+  const labelStyle = {
+    fontSize: 8,
+    color: 'var(--cyan-trace)',
+    fontFamily: 'Inter, sans-serif',
+    textAlign: 'center',
+    background: 'var(--ocean-deep)',
+    padding: '3px 4px',
+  };
+
+  return (
+    <div style={{ padding: '8px 10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+      {/* Original SAR */}
+      <div style={panelStyle}>
+        {originalSrc ? (
           <img
             src={originalSrc}
             alt={`Original: ${filename}`}
-            className="w-full h-32 object-cover rounded-lg border border-border"
+            style={{ width: '100%', height: 50, objectFit: 'cover', display: 'block' }}
           />
-          <p className="text-[10px] text-center text-slate-500 mt-1">Original</p>
-        </div>
-        <div>
-          <img
-            src={gradcamSrc}
-            alt={`Grad-CAM: ${filename}`}
-            className="w-full h-32 object-cover rounded-lg border border-border"
-          />
-          <p className="text-[10px] text-center text-slate-500 mt-1">Grad-CAM</p>
-        </div>
+        ) : (
+          <div style={{ height: 50, background: 'var(--ocean-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: 10, color: 'var(--cyan-trace)' }}>No preview</span>
+          </div>
+        )}
+        <p style={labelStyle}>SAR Original</p>
       </div>
 
-      {/* Mobile: toggled single view */}
-      <div className="lg:hidden">
+      {/* Grad-CAM */}
+      <div style={panelStyle}>
         <img
-          src={showHeatmap ? gradcamSrc : originalSrc}
-          alt={showHeatmap ? `Grad-CAM: ${filename}` : `Original: ${filename}`}
-          className="w-full h-36 object-cover rounded-lg border border-border"
+          src={gradcamSrc}
+          alt={`Grad-CAM: ${filename}`}
+          style={{ width: '100%', height: 50, objectFit: 'cover', display: 'block' }}
         />
-        <p className="text-[10px] text-center text-slate-500 mt-1">
-          {showHeatmap ? "Grad-CAM" : "Original"}
-        </p>
+        <p style={labelStyle}>Grad-CAM XAI</p>
       </div>
     </div>
   );
 }
 
-// Wrap in Suspense boundary for lazy loading
 export default function HeatmapViewer(props) {
   return (
-    <Suspense
-      fallback={
-        <div className="mt-3 h-28 rounded-lg skeleton" />
-      }
-    >
+    <Suspense fallback={
+      <div style={{ height: 70, margin: '0 10px', borderRadius: 6, background: 'var(--ocean-surface)' }}
+        className="skeleton" />
+    }>
       <HeatmapViewerInner {...props} />
     </Suspense>
   );
